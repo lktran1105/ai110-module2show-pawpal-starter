@@ -4,6 +4,21 @@
 
 **a. Initial design**
 
+#note in working: ask AI to fill in the missing pieces, as well as the relationships between the classes
+
+- The 4 classes and its attributes (information it needs to hold) and methods (actions it can perform)
+    - Pet
+        - Attributes: name, age, species, breed
+        - Methods: tasks: list[Task] add task, remove task, get task
+    - Owner: 
+        - Attributes: name
+        - Methods: create a pet, delete a pet, edit pet information, pets: list[Pet]
+    - Task: 
+        - Attribute: date, time, priority, task name, task description, completion status
+        - Method: change priority, change task date
+    - Schedule: 
+        - Attribute: list of tasks
+        - Method: generate schedule, get tasks for date
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 

@@ -1,0 +1,41 @@
+classDiagram
+    class Owner {
+        +str name
+        +list~Pet~ pets
+        +create_pet(name, species, breed, age) Pet
+        +delete_pet(pet_name) void
+        +edit_pet_info(pet, field, value) void
+    }
+
+    class Pet {
+        +str name
+        +int age
+        +str species
+        +str breed
+        +list~Task~ tasks
+        +add_task(task) void
+        +remove_task(task_name) void
+        +get_tasks() list~Task~
+    }
+
+    class Task {
+        +str task_name
+        +str description
+        +str priority
+        +date date
+        +time time
+        +int duration_minutes
+        +bool is_complete
+        +change_priority(new_priority) void
+        +change_date(new_date) void
+    }
+
+    class Schedule {
+        +list~Task~ tasks
+        +generate_schedule(available_minutes) list~Task~
+        +get_tasks_for_date(date) list~Task~
+    }
+
+    Owner "1" --> "0..*" Pet : owns
+    Pet "1" --> "0..*" Task : has
+    Schedule "1" --> "0..*" Task : organizes
