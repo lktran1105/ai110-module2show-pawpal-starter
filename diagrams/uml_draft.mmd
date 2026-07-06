@@ -4,7 +4,8 @@ classDiagram
         +list~Pet~ pets
         +create_pet(name, species, breed, age) Pet
         +delete_pet(pet_name) void
-        +edit_pet_info(pet, field, value) void
+        +edit_pet_info(pet, attribute, value) void
+        +get_all_tasks() list~Task~
     }
 
     class Pet {
@@ -30,12 +31,12 @@ classDiagram
         +change_date(new_date) void
     }
 
-    class Schedule {
-        +list~Task~ tasks
-        +generate_schedule(available_minutes) list~Task~
-        +get_tasks_for_date(date) list~Task~
+    class Scheduler {
+        +Owner owner
+        +generate_schedule(available_minutes) dict
+        +get_tasks_for_date(date) dict
     }
 
     Owner "1" --> "0..*" Pet : owns
     Pet "1" --> "0..*" Task : has
-    Schedule "1" --> "0..*" Task : organizes
+    Scheduler "1" --> "1" Owner : organizes tasks for

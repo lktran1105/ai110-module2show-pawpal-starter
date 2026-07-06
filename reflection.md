@@ -20,12 +20,23 @@
         - Attribute: list of tasks
         - Method: generate schedule, get tasks for date
 - Briefly describe your initial UML design.
+    - The initial design centers on four classes: Owner, Pet, Task, and Schedule. An Owner holds a list of Pets and is responsible for creating, deleting, and editing pets. Each Pet holds its own list of Tasks (walks, feeding, meds, etc.) and can add, remove, or retrieve them. Task stores the details of a single care item — name, description, priority, date/time, duration, and completion status — along with methods to update its priority or date. Schedule takes a pet's tasks and generates a daily plan based on available time, and can retrieve tasks for a specific date. The relationships are one-to-many throughout: one Owner → many Pets, one Pet → many Tasks, and Schedule organizes a set of Tasks. This keeps ownership/management logic (Owner) separate from care-tracking (Pet/Task) and separate again from the scheduling algorithm (Schedule).
 - What classes did you include, and what responsibilities did you assign to each?
+    - Owner — manages the collection of pets. Responsible for creating, deleting, and editing pet records. Holds a pets: list[Pet] attribute.
+    - Pet — represents an individual pet and manages its own care tasks. Holds identifying info (name, age, species, breed) and a tasks: list[Task] attribute, with methods to add, remove, and retrieve tasks.
+    - Task — represents a single care item (e.g., a walk or feeding). Holds the task's details (name, description, priority, date, time, duration, completion status) and methods to update its priority or reschedule its date.
+    - Schedule — responsible for turning a pet's tasks into an actual daily plan. Takes a list of tasks and generates an ordered schedule based on available time, and can retrieve tasks for a specific date.
+
+
+
 
 **b. Design changes**
 
 - Did your design change during implementation?
+    -   Yes
 - If yes, describe at least one change and why you made it.
+    - Change: Originally, Schedule held its own tasks: list[Task] attribute, separate from the tasks list already stored on Pet. I changed Schedule to instead hold a reference to a Pet (pet: Pet) and derive the tasks it needs directly from pet.tasks, rather than keeping a second copy.
+    - Why: Having two lists that were supposed to represent the same data (Pet.tasks and Schedule.tasks) created a risk of them drifting out of sync — for example, adding a task to a Pet wouldn't automatically update its Schedule, and vice versa. This is a classic single-source-of-truth problem: whichever object doesn't own the "real" data can become stale. By having Schedule reference the Pet object instead of duplicating its task list, there's only one place where a pet's tasks live, and the schedule is always generated from current data.
 
 ---
 
