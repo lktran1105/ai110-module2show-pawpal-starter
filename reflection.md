@@ -50,7 +50,9 @@
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+    - The scheduler fills the day greedily — it sorts tasks by priority (high → medium → low) and walks down the list, adding each task if it still fits in the remaining time. It never looks ahead or reconsiders. That means it doesn't always pack the day as efficiently as possible. For example: if 60 minutes are available and there's one 50-minute "high" task and two 25-minute "medium" tasks, the greedy approach takes the 50-minute task and leaves 10 minutes unused — even though skipping it in favor of the two 25-minute tasks would have filled all 60 minutes with more tasks completed. A "perfect" scheduler (like a knapsack-style optimizer) would consider every combination and pick the set that packs the most value into the available time.
 - Why is that tradeoff reasonable for this scenario?
+    - For a pet-care app, respecting priority order matters more than squeezing every last minute out of the schedule — a user expects "feed the dog" (high) to always beat "brush the cat" (low) for a scarce time slot, not get bumped because a smarter algorithm found a tighter packing. The greedy approach is also easy to explain to a user ("we did your most important tasks first"), fast to compute, and simple to implement/maintain, whereas a true optimal solution adds real complexity for a benefit (a few extra minutes packed in) that doesn't matter much at this scale (a handful of daily pet-care tasks, not hundreds of items).
 
 ---
 
