@@ -58,17 +58,43 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 
 ```bash
 # Run the full test suite:
-pytest
+python -m pytest
 
 # Run with coverage:
 pytest --cov
 ```
 
+The suite covers:
+
+- **Task basics** — marking a task complete, adding a task to a pet.
+- **Sorting correctness** — `Scheduler.sort_by_time()` returns tasks in chronological order regardless of the order they were added.
+- **Recurrence logic** — completing a daily task marks it done, generates a new pending task for the next day, and adds it back onto the same pet; completing a one-off task produces no next occurrence.
+- **Conflict detection** — `Scheduler.find_time_conflicts()` flags two tasks scheduled at the same date/time, and correctly reports no conflicts when tasks don't overlap.
+
 Sample test output:
 
 ```
-# Paste your pytest output here
+============================= test session starts ==============================
+platform darwin -- Python 3.13.11, pytest-9.1.1, pluggy-1.5.0 -- /opt/miniconda3/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/linhtran/Desktop/ai110-module2show-pawpal-starter
+plugins: anyio-4.12.1
+collecting ... collected 7 items
+
+tests/test_pawpal.py::test_mark_complete_changes_task_status PASSED      [ 14%]
+tests/test_pawpal.py::test_adding_task_increases_pet_task_count PASSED   [ 28%]
+tests/test_pawpal.py::test_sort_by_time_returns_chronological_order PASSED [ 42%]
+tests/test_pawpal.py::test_completing_daily_task_creates_task_for_next_day PASSED [ 57%]
+tests/test_pawpal.py::test_completing_one_off_task_does_not_create_next_occurrence PASSED [ 71%]
+tests/test_pawpal.py::test_find_time_conflicts_flags_duplicate_times PASSED [ 85%]
+tests/test_pawpal.py::test_find_time_conflicts_ignores_tasks_at_different_times PASSED [100%]
+
+============================== 7 passed in 0.01s ===============================
 ```
+
+**Confidence Level:** ⭐⭐⭐ (3/5)
+
+The core sorting, recurrence, and conflict-detection paths are verified and passing. Confidence isn't higher yet because coverage is still thin around known trouble spots: `Scheduler.complete_task()` locates the owning pet by value equality rather than identity (risky with duplicate-looking tasks across pets), `Task.get_next_occurrence()` does a case-sensitive lookup on `recurrence` (a typo'd value silently fails to recur), and `Scheduler._fit_tasks_to_time()` (the greedy time-boxing logic) has no tests at all yet.
 
 ## 📐 Smarter Scheduling
 
