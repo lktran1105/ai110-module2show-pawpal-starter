@@ -45,7 +45,9 @@
 **a. Constraints and priorities**
 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
+    - Two hard constraints: available time (`generate_schedule(available_minutes)` won't select more tasks than fit in the budget) and priority (`high` → `medium` → `low`, via `PRIORITY_ORDER`). It also implicitly respects completion status (only pending tasks are considered for scheduling) and date (`get_tasks_for_date`, `find_time_conflicts` can scope to a single day).
 - How did you decide which constraints mattered most?
+    - Time and priority are the two constraints a pet owner actually feels day to day — "how much time do I have" and "what can't slip." Preferences (e.g., "walks before feeding") were left out of this iteration since there's no attribute on `Owner`/`Pet` to represent them yet; adding that would mean extending the model rather than the scheduling algorithm itself.
 
 **b. Tradeoffs**
 
@@ -61,12 +63,16 @@
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+    - I used AI mainly in three ways: (1) brainstorming edge cases for the scheduler before writing tests, (2) drafting the actual test functions to match my existing fixtures/style, and (3) auditing my final code against my original UML draft and updating the diagram to match — plus drafting the README's testing/features/demo sections using real output from actually running `pytest` and `main.py`, not invented output.
 - What kinds of prompts or questions were most helpful?
+    - Asking "what are the most important edge cases to test" before asking it to write any tests. That surfaced two real, silent bugs I hadn't noticed: `Scheduler.complete_task()` finds the owning pet using `task in p.get_tasks()`, which relies on dataclass value equality rather than task identity; and `Task.get_next_occurrence()` does a case-sensitive lookup on `recurrence`, so a typo like `"Daily"` silently fails to recur instead of erroring.
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
+    - When I asked for the UML diagram to be brought in line with my final code, its first move was to edit `uml_draft.mmd` directly. I stopped that and asked it to leave `uml_draft.mmd` untouched and put the updated diagram in a new `uml_final.mmd` file instead — the draft is supposed to be a record of my original design, and overwriting it would have erased the exact before/after comparison this reflection asks for in Section 1b.
 - How did you evaluate or verify what the AI suggested?
+    - I didn't take generated test output or CLI output on faith — I had it actually run `python -m pytest` and `python main.py` and paste the real terminal output, so I could check the pass count and printed schedule myself line by line rather than trusting a plausible-looking but possibly fabricated transcript.
 
 ---
 
@@ -75,12 +81,16 @@
 **a. What you tested**
 
 - What behaviors did you test?
+    - Sorting correctness (`sort_by_time` returns tasks in chronological order regardless of the order they were added), recurrence logic (completing a daily task marks it done, creates a next-day task, and adds it to the correct pet; a one-off task produces no next occurrence), and conflict detection (two tasks at the same date/time are flagged, and non-conflicting tasks correctly produce no warnings).
 - Why were these tests important?
+    - These three behaviors are what the scheduler's usefulness actually rests on: wrong ordering makes a plan hard to read, broken recurrence means an owner silently stops getting reminded about ongoing care, and an undetected conflict means the app could hand back a double-booked plan without any warning.
 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+    - Moderate — 3 out of 5. Every test I wrote passes against a real `pytest` run, and the paths I tested (sorting, recurrence, conflicts) are solid. My confidence isn't higher because I know of untested trouble spots in the code itself, not just gaps in coverage.
 - What edge cases would you test next if you had more time?
+    - The `complete_task` value-equality bug (duplicate-looking tasks across two different pets could resolve to the wrong pet), the case-sensitive `recurrence` string lookup (a typo'd value fails silently instead of raising), and the greedy `_fit_tasks_to_time` time-boxing logic, which has no tests at all yet — including boundary cases like a task whose duration exactly equals the remaining time budget.
 
 ---
 
@@ -89,11 +99,14 @@
 **a. What went well**
 
 - What part of this project are you most satisfied with?
+    - Catching the `complete_task` equality bug and the case-sensitive recurrence bug before they shipped, simply by asking "what edge cases matter" before writing any tests, rather than writing tests only for the behavior I already assumed was correct.
 
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
+    - I'd fix `complete_task` to identify the owning pet by identity instead of value equality (e.g., by looking up the pet a task was added to, rather than searching with `in`), add the missing tests for `_fit_tasks_to_time`, and decide explicitly whether duplicate pet/task names should be allowed — right now several methods (`remove_task`, `delete_pet`, `filter_tasks`) silently match by name and could affect more records than intended.
 
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+    - "Greedy" and "matches by value" are both design decisions that look completely correct until you write down the specific input that breaks them. AI was most useful not when writing code for me, but when I asked it to actively look for the counterexample before I moved on — that's what turned up bugs a straightforward "write some tests" pass would have missed.
